@@ -17,14 +17,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
-      - name: Install ARM Toolchain from Arm Official
+      - name: Install ARM Toolchain
         run: |
           wget https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz
           mkdir -p $HOME/arm-toolchain
-          tar -xf arm-gnu-toolchain-*.tar.xz -C $HOME/arm-toolchain --strip-components=1
+          tar -xf arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz -C $HOME/arm-toolchain --strip-components=1
           echo "$HOME/arm-toolchain/bin" >> $GITHUB_PATH
+
+      - name: Verify ARM Toolchain
+        run: |
+          arm-none-eabi-gcc --version
+          arm-none-eabi-g++ --version
+          arm-none-eabi-g++ -dumpversion
 
       - name: Install PROS CLI
         run: |
@@ -32,4 +38,8 @@ jobs:
           pip install pros-cli
 
       - name: Build Project
-        run: pros make all
+        env:
+          C_STANDARD: gnu2x
+          CXX_STANDARD: gnu++23
+        run: |
+          pros make all
